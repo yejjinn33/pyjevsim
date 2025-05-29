@@ -7,6 +7,16 @@
 pip install -r requirements
 ```
 
+## 프로그램 실행방법
+- Windows
+```
+(venv) C:\repo\strategic_analysis_project\python project\simulator.py
+```
+- Linux/Mac
+```
+(venv) ~/ python project/simulator.py
+```
+
 ## 수정 불가한 파일
  - manuever.py
  - detetor.py
@@ -20,7 +30,12 @@ pip install -r requirements
 ## 가정사항
  - 수상함의 위치와 어뢰의 위치는 변경할 수 없다. 
  - 수상함의 속도와 어뢰의 속도는 변경할 수 없다. 
- - 
+ - 기만기는 언제든지 발사할 수 있다. 
+ - 총 비용 10에서 고정식, 자항식 기만기는 자율적으로 운용할 수 있으며 총 비용 10을 초과할 수 없다. 
+  - 단, 고정식 기만기는 비용 1, 자항식 기만기의 비용은 2.5이다. 
+  - 예1) 고정식 기만기 10개를 시간차를 두고 운용(총 비용: 10)
+  - 예2) 자항식 기만기를 3개 고정식 기만기를 2개 운용(총 비용: 9.5)
+ - 동점인 경우(공격과 방어에 모두 성공, 모두 실패 등) 기만기를 적게 사용하는 경우 가산점을 준다. 
 
 ## 수정 불가한 파라미터
  - ManueverObject 파라미터
