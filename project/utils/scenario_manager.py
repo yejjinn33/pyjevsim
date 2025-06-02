@@ -3,7 +3,7 @@ import importlib
 
 class ScenarioManager:
     def __init__(self, abs_path, sce_name="", apath="", dpath=""):
-        attack_path = f"attack{apath}.model.torpedoe"
+        attack_path = f"attack{apath}.model.torpedo"
         apkg = importlib.import_module(attack_path)
 
         defense_path = f"defense{dpath}.model.surfaceship"

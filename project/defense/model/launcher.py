@@ -6,8 +6,8 @@ from utils.object_db import ObjectDB
 
 from .stationary_decoy import StationaryDecoy
 from .self_propelled_decoy import SelfPropelledDecoy
-from mobject.stationary_decoy_object import StationaryDecoyObject
-from mobject.self_propelled_decoy_object import SelfPropelledDecoyObject
+from ..mobject.stationary_decoy_object import StationaryDecoyObject
+from ..mobject.self_propelled_decoy_object import SelfPropelledDecoyObject
 
 class Launcher(BehaviorModel):
     def __init__(self, name, platform):
