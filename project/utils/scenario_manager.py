@@ -3,14 +3,14 @@ import importlib
 
 class ScenarioManager:
     def __init__(self, abs_path, sce_name="", apath="", dpath=""):
-        attack_path = f"attack{apath}.model.surfaceship"
+        attack_path = f"attack{apath}.model.torpedoe"
         apkg = importlib.import_module(attack_path)
 
-        defense_path = f"defense{dpath}.model.torpedo"
+        defense_path = f"defense{dpath}.model.surfaceship"
         dpkg = importlib.import_module(defense_path)
         
-        ship_cls = getattr(apkg, 'SurfaceShip')
-        torpedo_cls = getattr(dpkg, 'Torpedo')
+        ship_cls = getattr(dpkg, 'SurfaceShip')
+        torpedo_cls = getattr(apkg, 'Torpedo')
 
         # Read YAML file
         with open(f"{abs_path}\\attack{apath}\\scenario\\{sce_name}", 'r') as f:
