@@ -17,7 +17,7 @@ class ScenarioManager:
             yaml_data = yaml.safe_load(f)
             self.torpedoes = [torpedo_cls(f"red_torpedo_{idx}", d) for idx, d in enumerate(yaml_data['Torpedo'])]
         
-        with open(f"{abs_path}\\defense{apath}\\scenario\\{sce_name}", 'r') as f:
+        with open(f"{abs_path}\\defense{dpath}\\scenario\\{sce_name}", 'r') as f:
             yaml_data = yaml.safe_load(f)
             self.surface_ships = [ship_cls(f"blue_ship_{idx}", d) for idx, d in enumerate(yaml_data['SurfaceShip'])]
 
