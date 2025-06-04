@@ -12,7 +12,7 @@ from ..mobject.self_propelled_decoy_object import SelfPropelledDecoyObject
 class Launcher(BehaviorModel):
     def __init__(self, name, platform):
         BehaviorModel.__init__(self, name)
-        
+
         self.platform = platform
         
         self.init_state("Wait")
@@ -22,6 +22,7 @@ class Launcher(BehaviorModel):
         self.insert_input_port("order")
 
         self.launch_flag = False
+
 
     def ext_trans(self,port, msg):
         if port == "order":
