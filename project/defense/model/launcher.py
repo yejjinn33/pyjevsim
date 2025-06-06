@@ -2,6 +2,7 @@ import datetime
 import math
 
 from pyjevsim import BehaviorModel, Infinite
+from pyjevsim.system_message import SysMessage
 from utils.object_db import ObjectDB
 
 from .stationary_decoy import StationaryDecoy
@@ -20,39 +21,38 @@ class Launcher(BehaviorModel):
         self.insert_state("Launch", 0)
 
         self.insert_input_port("order")
-
         self.launch_flag = False
 
-
-    def ext_trans(self,port, msg):
+    def ext_trans(self, port, msg):
         if port == "order":
-            print(f"{self.get_name()}[order_recv]: {datetime.datetime.now()}")
+            print(f"[{self.get_name()}][order_recv]: {datetime.datetime.now()}")
             self._cur_state = "Launch"
 
     def output(self, msg):
-        if not self.launch_flag:
-            se = ObjectDB().get_executor()
+        se = ObjectDB().get_executor()
 
-            for idx, decoy in enumerate(self.platform.lo.get_decoy_list()):
-                destroy_t = math.ceil(decoy['lifespan'])
-                if decoy["type"] == "stationary":
-                    sdo = StationaryDecoyObject(self.platform.get_position(), decoy)
-                    decoy_model = StationaryDecoy(f"[Decoy][{idx}]", sdo)
-                elif decoy["type"] == "self_propelled":
-                    sdo = SelfPropelledDecoyObject(self.platform.get_position(), decoy)
-                    decoy_model = SelfPropelledDecoy(f"[Decoy][{idx}]", sdo)
-                else:
-                    sdo = None
-                
-                ObjectDB().decoys.append((f"[Decoy][{idx}]", sdo))
-                ObjectDB().items.append(sdo)
-                se.register_entity(decoy_model, 0, destroy_t)
-                
-        self.launch_flag = True
+        while hasattr(self.platform.lo, "decoy_queue") and self.platform.lo.decoy_queue:
+            decoy = self.platform.lo.decoy_queue.pop(0)
+            idx = len(ObjectDB().decoys)
 
-        #se.register_entity()
-        return None
-        
+            print(f"[{self.get_name()}][Launching Decoy {idx}]: {decoy}")
+
+            destroy_t = math.ceil(decoy['lifespan'])
+
+            if decoy["type"] == "stationary":
+                sdo = StationaryDecoyObject(self.platform.get_position(), decoy)
+                decoy_model = StationaryDecoy(f"[Decoy][{idx}]", sdo)
+            elif decoy["type"] == "self_propelled":
+                sdo = SelfPropelledDecoyObject(self.platform.get_position(), decoy)
+                decoy_model = SelfPropelledDecoy(f"[Decoy][{idx}]", sdo)
+            else:
+                continue
+
+            ObjectDB().decoys.append((f"[Decoy][{idx}]", sdo))
+            ObjectDB().items.append(sdo)
+            se.register_entity(decoy_model, 0, destroy_t)
+
+
     def int_trans(self):
         if self._cur_state == "Launch":
             self._cur_state = "Wait"

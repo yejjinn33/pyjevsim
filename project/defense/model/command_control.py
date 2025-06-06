@@ -21,9 +21,8 @@ class CommandControl(BehaviorModel):
     def generate_random_decoy_plan(self):
         plan = []
         base_heading = random.randint(0, 360)
-        for i in range(random.randint(3, 5)):
+        for i in range(1): 
             if random.random() < 0.5:
-                # 고정식 decoy
                 plan.append({
                     "type": "stationary",
                     "lifespan": random.randint(5, 15),
@@ -32,18 +31,21 @@ class CommandControl(BehaviorModel):
                     "speed": random.randint(5, 10),
                 })
             else:
-                # 자항식 decoy (속도 낮춤)
                 plan.append({
                     "type": "self_propelled",
                     "lifespan": random.randint(10, 20),
                     "elevation": random.choice([0, 10]),
                     "azimuth": random.randint(0, 360),
-                    "speed": random.randint(5, 10),   # z축 속도
+                    "speed": random.randint(5, 10),
                     "heading": (base_heading + i * 15) % 360,
-                    "xy_speed": random.randint(4, 8),  # 낮은 xy 속도 → 수상함 느낌
+                    "xy_speed": random.randint(4, 8),
                 })
-        return plan
 
+        print(f"[{self.get_name()}][Generated Decoy Plan]:")
+        for idx, d in enumerate(plan):
+            print(f"  - Decoy[{idx}]: {d}")
+
+        return plan
 
     def ext_trans(self, port, msg):
         if port == "threat_list":
@@ -54,12 +56,12 @@ class CommandControl(BehaviorModel):
     def output(self, msg):
         for target in self.threat_list:
             if self.platform.co.threat_evaluation(self.platform.mo, target):
-                if not hasattr(self.platform.lo, "strategy_set"):
+                if not hasattr(self.platform.lo, "decoy_queue") or not self.platform.lo.decoy_queue:
                     self.platform.lo.get_decoy_list = self.generate_random_decoy_plan
-                    self.platform.lo.strategy_set = True
+                    self.platform.lo.decoy_queue = self.generate_random_decoy_plan()
 
-                message = SysMessage(self.get_name(), "launch_order")
-                msg.insert_message(message)
+                if self.platform.lo.decoy_queue:
+                    msg.insert_message(SysMessage(self.get_name(), "launch_order"))
 
                 self.platform.mo.change_heading(self.platform.co.get_evasion_heading())
 
