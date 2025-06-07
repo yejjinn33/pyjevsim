@@ -1,7 +1,15 @@
 import random
 import datetime
+import math
 from pyjevsim import BehaviorModel, Infinite
 from pyjevsim.system_message import SysMessage
+from utils.object_db import ObjectDB
+
+def get_distance(obj1, obj2):
+    """두 객체 간 유클리디안 거리 계산"""
+    x1, y1, z1 = obj1.get_position()
+    x2, y2, z2 = obj2.get_position()
+    return math.sqrt((x1 - x2)**2 + (y1 - y2)**2 + (z1 - z2)**2)
 
 class CommandControl(BehaviorModel):
     def __init__(self, name, platform):
@@ -18,8 +26,8 @@ class CommandControl(BehaviorModel):
 
         self.threat_list = []
 
-        self.current_cost = 0           #  누적된 디코이 발사 비용
-        self.cost_limit = 10            #  총 비용 제한
+        self.current_cost = 0           # 누적된 디코이 발사 비용
+        self.cost_limit = 10           # 총 비용 제한
         self.cost_exceeded = False  
 
     def get_decoy_cost(self, decoy):
@@ -75,18 +83,30 @@ class CommandControl(BehaviorModel):
     def output(self, msg):
         for target in self.threat_list:
             if self.platform.co.threat_evaluation(self.platform.mo, target):
-                #  조건: 비용 초과 안 하고 큐가 비었을 때만
-                if not hasattr(self.platform.lo, "decoy_queue") or not self.platform.lo.decoy_queue:
-                    new_plan = self.generate_random_decoy_plan()
-                    if new_plan:
-                        self.platform.lo.get_decoy_list = self.generate_random_decoy_plan
-                        self.platform.lo.decoy_queue = new_plan
-                        msg.insert_message(SysMessage(self.get_name(), "launch_order"))
+                dist_main = get_distance(self.platform.mo, target)
+
+                decoys = [d[1] for d in ObjectDB().decoys]
+                dist_decoy = min(
+                    (get_distance(d, target) for d in decoys), default=float('inf')
+                )
+
+                print(f"[{self.get_name()}] 본선 거리: {dist_main:.2f}, 디코이 거리: {dist_decoy:.2f}")
+
+                # 💡 디코이가 없거나 본선이 더 가까울 경우에만 발사
+                if not decoys or dist_main < dist_decoy:
+                    if not hasattr(self.platform.lo, "decoy_queue") or not self.platform.lo.decoy_queue:
+                        new_plan = self.generate_random_decoy_plan()
+                        if new_plan:
+                            self.platform.lo.get_decoy_list = self.generate_random_decoy_plan
+                            self.platform.lo.decoy_queue = new_plan
+                            msg.insert_message(SysMessage(self.get_name(), "launch_order"))
+                            print(f"[{self.get_name()}] 디코이 발사 명령 전달")
 
                 self.platform.mo.change_heading(self.platform.co.get_evasion_heading())
 
         self.threat_list = []
         return msg
+
 
     def int_trans(self):
         if self._cur_state == "Decision":
