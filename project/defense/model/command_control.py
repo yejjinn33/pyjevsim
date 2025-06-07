@@ -92,7 +92,7 @@ class CommandControl(BehaviorModel):
 
                 print(f"[{self.get_name()}] 본선 거리: {dist_main:.2f}, 디코이 거리: {dist_decoy:.2f}")
 
-                # 💡 디코이가 없거나 본선이 더 가까울 경우에만 발사
+                #  디코이가 없거나 본선이 더 가까울 경우에만 발사
                 if not decoys or dist_main < dist_decoy:
                     if not hasattr(self.platform.lo, "decoy_queue") or not self.platform.lo.decoy_queue:
                         new_plan = self.generate_random_decoy_plan()
